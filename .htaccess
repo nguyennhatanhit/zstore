@@ -1,0 +1,22 @@
+# Không liệt kê danh sách file khi vào thư mục
+Options -Indexes
+
+# Chặn tải trực tiếp file nhạy cảm: tài liệu, SQL, file ẩn (.git, .env...)
+<FilesMatch "\.(md|sql|log|ini|bak)$|^\.">
+    Require all denied
+</FilesMatch>
+
+# Header bảo mật cho cả file tĩnh (css, js, ảnh)
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header unset X-Powered-By
+</IfModule>
+
+# ---- Giữ địa chỉ web ngắn gọn (cần mod_rewrite, XAMPP bật sẵn) ----
+#   localhost/techstore/cart.php      -> frontend/pages/cart.php
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^([A-Za-z0-9_-]+\.php)$ frontend/pages/$1 [L,QSA]
+</IfModule>
