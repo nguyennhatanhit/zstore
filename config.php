@@ -52,7 +52,7 @@ define('DB_PASS', '');
 define('SHIPPING_FEE', 30000);
 define('FREE_SHIPPING_FROM', 5000000);
 define('LOW_STOCK', 5);
-define('BANK_NAME', env('BANK_NAME', 'Vietcombank'));
+define('BANK_NAME', env('BANK_NAME', 'BANK_NAME'));
 define('BANK_ACCOUNT', env('BANK_ACCOUNT'));
 define('BANK_OWNER', env('BANK_OWNER'));
 define('UNPAID_ORDER_HOURS', 24);
@@ -62,9 +62,9 @@ define('AI_LIMIT_PER_HOUR', 20);
 define('PAYOS_CLIENT_ID',    env('PAYOS_CLIENT_ID'));
 define('PAYOS_API_KEY',      env('PAYOS_API_KEY'));
 define('PAYOS_CHECKSUM_KEY', env('PAYOS_CHECKSUM_KEY'));
-// Địa chỉ HTTPS công khai của website (Ngrok khi chạy XAMPP). Ví dụ: https://abcd.ngrok-free.app
+// Địa chỉ HTTPS công khai của website (Ngrok khi chạy XAMPP)
 define('PAYOS_SITE_URL',     env('PAYOS_SITE_URL'));
-// Chữ đầu nội dung chuyển khoản PayOS (chỉ chữ/số, tối đa 3 ký tự), VD: ATS15
+// Chữ đầu nội dung chuyển khoản PayOS
 define('PAYOS_DESC_PREFIX',  env('PAYOS_DESC_PREFIX', 'ATS'));
 
 // AI
@@ -72,7 +72,7 @@ define('AI_PROVIDER', env('AI_PROVIDER', 'groq'));
 define('AI_MODEL',    env('AI_MODEL', 'openai/gpt-oss-120b'));
 define('AI_API_KEY',  env('AI_API_KEY'));
 
-// Gửi email (mã quên mật khẩu) qua Gmail SMTP, tài khoản trong .env
+// Gửi email (mã quên mật khẩu) qua Gmail
 define('MAIL_HOST',       env('MAIL_HOST', 'smtp.gmail.com'));
 define('MAIL_PORT',       (int) env('MAIL_PORT', '465'));
 define('MAIL_ENCRYPTION', env('MAIL_ENCRYPTION', 'ssl'));

@@ -1,0 +1,28 @@
+name: 🚀 Deploy website lên InfinityFree
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  web-deploy:
+    name: Đang tải file lên hosting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lấy code mới nhất từ GitHub
+        uses: actions/checkout@v4
+
+      - name: Đồng bộ file qua FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ftpupload.net
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /htdocs/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            .github/**
