@@ -27,6 +27,14 @@
     <div class="container footer-bottom">© <?= date('Y') ?> <?= APP_NAME ?> · Đồ án môn học</div>
 </footer>
 
+<div class="qv-modal" id="quick-view" data-quick-url="<?= url('product-api.php') ?>" hidden>
+    <div class="qv-backdrop" data-qv-close></div>
+    <div class="qv-box" role="dialog" aria-modal="true" aria-labelledby="qv-title">
+        <button type="button" class="qv-close" data-qv-close aria-label="Đóng"><i class="bi bi-x-lg"></i></button>
+        <div class="qv-body" data-qv-body></div>
+    </div>
+</div>
+
 <?php if (basename($_SERVER['SCRIPT_NAME']) !== 'ai.php'): ?>
 <?php $aiChat = $_SESSION['ai_chat'] ?? []; ?>
 <div class="ai-float" data-ai-float>

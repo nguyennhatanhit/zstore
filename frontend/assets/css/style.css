@@ -845,3 +845,82 @@ h1, h2, h3 { letter-spacing: -0.01em; }
     .ai-float.is-open .ai-bubble { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .ai-panel, .ai-typing span { animation: none; } }
+
+/* Giỏ hàng AJAX: thông báo nhỏ góc trên bên phải */
+.header-link .count[hidden] { display: none; }
+.summary-rows { display: contents; }
+.toast-stack { position: fixed; top: 84px; right: 20px; z-index: 1200; display: grid; gap: 8px; width: min(360px, calc(100vw - 24px)); }
+.toast-stack .alert { margin: 0; box-shadow: 0 10px 30px rgba(15, 23, 42, .15); animation: toast-in .2s ease-out; }
+.toast-stack .alert a { color: inherit; font-weight: 600; text-decoration: underline; white-space: nowrap; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-6px); } }
+tr.is-updating { opacity: .55; transition: opacity .15s; }
+.is-bump { animation: bump .35s ease-out; }
+@keyframes bump { 40% { transform: scale(1.35); } }
+@media (max-width: 560px) { .toast-stack { top: auto; bottom: 76px; right: 12px; } }
+@media (prefers-reduced-motion: reduce) { .toast-stack .alert, .is-bump { animation: none; } }
+
+/* Tìm kiếm gợi ý (AJAX) */
+.header-search { position: relative; }
+.search-suggest {
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 950;
+    background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-12);
+    box-shadow: 0 16px 40px rgba(15, 23, 42, .14); overflow: hidden; color: var(--color-text);
+}
+.search-suggest[hidden] { display: none; }
+.suggest-item { display: flex; align-items: center; gap: 12px; padding: 8px 14px; }
+.suggest-item img { width: 40px; height: 40px; object-fit: contain; border-radius: 8px; background: var(--color-bg); flex-shrink: 0; }
+.suggest-item .suggest-text { flex: 1; min-width: 0; display: grid; }
+.suggest-item b { font-weight: 500; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.suggest-item small { color: var(--color-muted); font-size: 12px; }
+.suggest-item .suggest-price { font-weight: 600; color: var(--color-blue); font-size: 14px; white-space: nowrap; }
+.suggest-item.is-active, .suggest-item:hover { background: var(--color-bg); }
+.suggest-item mark { background: none; color: var(--color-blue); font-weight: 700; }
+.suggest-all { display: block; padding: 10px 14px; border-top: 1px solid var(--color-border); font-size: 13px; font-weight: 600; color: var(--color-blue); }
+.suggest-all.is-active, .suggest-all:hover { background: var(--color-bg); }
+.suggest-empty { padding: 14px; font-size: 14px; color: var(--color-muted); }
+#build-rows.is-loading { opacity: .6; pointer-events: none; transition: opacity .15s; }
+
+/* Xem nhanh sản phẩm (AJAX) */
+.product-card { position: relative; }
+.quick-view-btn {
+    position: absolute; top: 10px; right: 10px; z-index: 2; width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid var(--color-border); background: #fff; color: var(--color-text); cursor: pointer;
+    display: grid; place-items: center; font-size: 16px; box-shadow: var(--shadow-sm);
+    opacity: 0; transform: translateY(-4px); transition: opacity .15s, transform .15s, color .15s, border-color .15s;
+}
+.product-card:hover .quick-view-btn, .quick-view-btn:focus-visible { opacity: 1; transform: none; }
+.quick-view-btn:hover { color: var(--color-blue); border-color: var(--color-blue); }
+@media (hover: none) { .quick-view-btn { opacity: 1; transform: none; width: 32px; height: 32px; font-size: 14px; } }
+
+.qv-modal { position: fixed; inset: 0; z-index: 1100; display: grid; place-items: center; padding: 24px; }
+.qv-modal[hidden] { display: none; }
+.qv-backdrop { position: absolute; inset: 0; background: rgba(15, 23, 42, .5); }
+.qv-box { position: relative; width: min(860px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; background: #fff; border-radius: 16px; box-shadow: 0 24px 64px rgba(15, 23, 42, .3); animation: qv-in .18s ease-out; }
+@keyframes qv-in { from { opacity: 0; transform: translateY(10px) scale(.98); } }
+.qv-close { position: absolute; top: 12px; right: 12px; z-index: 1; width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--color-bg); color: var(--color-muted); cursor: pointer; display: grid; place-items: center; }
+.qv-close:hover { background: var(--color-border); color: var(--color-text); }
+.qv { display: grid; grid-template-columns: 1fr 1.1fr; }
+.qv-img { display: grid; place-items: center; padding: 28px; background: #fff; border-right: 1px solid var(--color-border); }
+.qv-img img { width: 100%; max-width: 340px; aspect-ratio: 1 / 1; object-fit: contain; }
+.qv-info { padding: 28px; display: flex; flex-direction: column; gap: 10px; }
+.qv-info h2 { margin: 0; font-size: 22px; line-height: 1.3; padding-right: 36px; }
+.qv-short { margin: 0; color: var(--color-muted); }
+.qv-specs { list-style: none; margin: 0; padding: 10px 0 0; border-top: 1px solid var(--color-border); display: grid; gap: 6px; font-size: 14px; }
+.qv-specs li { display: flex; justify-content: space-between; gap: 12px; }
+.qv-specs span { color: var(--color-muted); }
+.qv-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: auto; padding-top: 8px; }
+.qv-actions form { margin: 0; }
+.qv-loading .skeleton { display: block; height: 16px; border-radius: 8px; background: linear-gradient(90deg, #eef2f7 25%, #f8fafc 50%, #eef2f7 75%); background-size: 200% 100%; animation: qv-shimmer 1.2s infinite; }
+.qv-loading .qv-img .skeleton { width: 100%; max-width: 340px; height: auto; aspect-ratio: 1 / 1; }
+@keyframes qv-shimmer { to { background-position: -200% 0; } }
+.qv-error { padding: 48px 28px; text-align: center; }
+@media (max-width: 680px) {
+    .qv-modal { padding: 0; place-items: end center; }
+    .qv-box { max-height: 92vh; border-radius: 16px 16px 0 0; }
+    .qv { grid-template-columns: 1fr; }
+    .qv-img { border-right: 0; border-bottom: 1px solid var(--color-border); padding: 16px; }
+    .qv-img img { max-width: 220px; }
+    .qv-info { padding: 18px; }
+    .qv-info h2 { font-size: 19px; }
+}
+@media (prefers-reduced-motion: reduce) { .qv-box, .qv-loading .skeleton { animation: none; } }

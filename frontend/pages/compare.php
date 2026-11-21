@@ -16,6 +16,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         unset($_SESSION['compare']);
         set_flash('success', 'Đã xóa danh sách so sánh.');
     }
+    // Nút So sánh ở trang sản phẩm gửi bằng JavaScript: trả JSON thay vì chuyển trang
+    if (post_str('ajax') === '1') {
+        $flash = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+        json_response([
+            'ok'            => $flash['type'] === 'success',
+            'message'       => $flash['message'],
+            'compare_count' => compare_count(),
+            'in_compare'    => in_array($productId, $_SESSION['compare'] ?? []),
+        ], $flash['type'] === 'success' ? 200 : 422);
+    }
     redirect_back('compare.php');
 }
 
@@ -110,7 +121,7 @@ require '../layout/header.php';
                     <th></th>
                     <?php foreach ($products as $p): ?>
                         <td>
-                            <form action="<?= url('cart.php') ?>" method="post">
+                            <form action="<?= url('cart.php') ?>" method="post" class="add-to-cart">
                                 <input type="hidden" name="action" value="add">
                                 <input type="hidden" name="product_id" value="<?= $p['id'] ?>">
                                 <?= back_field() ?>

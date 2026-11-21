@@ -127,6 +127,18 @@ function show_flash()
          . '<button type="button" class="alert-close" aria-label="Đóng"><i class="bi bi-x-lg"></i></button></div>';
 }
 
+/** Trả JSON cho AJAX rồi dừng */
+function json_response($data, $status = 200)
+{
+    while (ob_get_level() > 0) {
+        ob_end_clean(); // bỏ bộ đệm csrf_inject: JSON phải được gửi nguyên vẹn
+    }
+    http_response_code($status);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 /** Phân trang: $p = paginate($tongSoDong, 12) */
 function paginate($total, $perPage = 12)
 {

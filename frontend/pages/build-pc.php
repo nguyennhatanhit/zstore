@@ -45,32 +45,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result  = $quota ? ['error' => $quota] : ai_optimize_build($build, check_compatibility($build), $budget, $purpose);
         $_SESSION['build_ai'] = $result + ['budget' => $budget, 'purpose' => $purpose];
     }
+    // Chọn / bỏ linh kiện bằng JavaScript: trả về phần danh sách và phần kiểm tra mới
+    if (post_str('ajax') === '1') {
+        $build = isset($_SESSION['build']) ? $_SESSION['build'] : [];
+        ['options' => $options, 'selected' => $selected, 'total' => $total, 'compat' => $compat, 'keySpecs' => $keySpecs] = build_view($build);
+        ob_start();
+        require '../layout/build_rows.php';
+        $rowsHtml = csrf_inject(ob_get_clean());
+        ob_start();
+        require '../layout/build_check.php';
+        $checkHtml = ob_get_clean();
+        json_response(['ok' => true, 'count' => count($selected), 'rows_html' => $rowsHtml, 'check_html' => $checkHtml]);
+    }
     redirect('build-pc.php');
 }
 
-// Danh sách sản phẩm cho từng vị trí (còn hàng)
-$options = [];
-foreach ($slots as $code => $name) {
-    $options[$code] = db_all(product_sql() . " WHERE c.code = ? AND p.status = 'active' AND p.stock_quantity > 0 ORDER BY p.price", [$code]);
-}
-
-// Sản phẩm đã chọn
-$selected = [];
-$total = 0;
-foreach ($build as $code => $productId) {
-    $p = db_one(product_sql() . " WHERE p.id = ?", [$productId]);
-    if ($p) {
-        $p['sale_price'] = sale_price($p);
-        $p['specs'] = product_spec_map($p['id']);
-        $selected[$code] = $p;
-        $total += $p['sale_price'];
-    }
-}
-$compat = check_compatibility($build);
+['options' => $options, 'selected' => $selected, 'total' => $total, 'compat' => $compat, 'keySpecs' => $keySpecs] = build_view($build);
 $aiResult = isset($_SESSION['build_ai']) ? $_SESSION['build_ai'] : null;
-
-// Thông số chính hiển thị dưới tên linh kiện
-$keySpecs = ['socket', 'ram_type', 'form_factor', 'capacity', 'tdp', 'wattage', 'vram', 'length', 'cores', 'speed'];
 
 $title = 'Build PC';
 require '../layout/header.php';
@@ -82,76 +73,26 @@ require '../layout/header.php';
             <h1>Build PC</h1>
             <p class="text-muted">Chọn từng linh kiện, hệ thống tự kiểm tra tương thích và AI giúp tối ưu cấu hình.</p>
         </div>
-        <?php if ($build): ?>
-            <form method="post" data-confirm="Xóa toàn bộ cấu hình đang chọn?">
-                <input type="hidden" name="action" value="clear">
-                <button class="btn btn-outline"><i class="bi bi-arrow-counterclockwise"></i> Làm lại</button>
-            </form>
-        <?php endif; ?>
+        <form method="post" data-confirm="Xóa toàn bộ cấu hình đang chọn?" id="build-clear" <?= $build ? '' : 'hidden' ?>>
+            <input type="hidden" name="action" value="clear">
+            <button class="btn btn-outline"><i class="bi bi-arrow-counterclockwise"></i> Làm lại</button>
+        </form>
     </div>
 
     <div class="cart-layout">
-        <div class="card no-pad">
-            <?php foreach ($slots as $code => $name): $p = isset($selected[$code]) ? $selected[$code] : null; ?>
-                <div class="build-row <?= $p ? 'chosen' : '' ?>">
-                    <div class="build-slot"><?= e($name) ?></div>
-                    <?php if ($p): ?>
-                        <div class="build-product">
-                            <img src="<?= img_url($p['image']) ?>" alt="" onerror="this.onerror=null;this.src='<?= img_url('') ?>'">
-                            <div>
-                                <a href="<?= url('product.php?id=' . $p['id']) ?>"><b><?= e($p['name']) ?></b></a>
-                                <div class="cell-sub">
-                                    <?php foreach ($keySpecs as $k) { if (isset($p['specs'][$k])) echo '<span class="tag">' . e($k) . ': ' . e($p['specs'][$k]) . '</span> '; } ?>
-                                </div>
-                            </div>
-                            <b class="build-price"><?= money($p['sale_price']) ?></b>
-                            <form method="post">
-                                <input type="hidden" name="action" value="remove">
-                                <input type="hidden" name="slot" value="<?= $code ?>">
-                                <button class="icon-btn" title="Bỏ chọn"><i class="bi bi-x-lg"></i></button>
-                            </form>
-                        </div>
-                    <?php else: ?>
-                        <form method="post" class="build-select">
-                            <input type="hidden" name="action" value="set">
-                            <input type="hidden" name="slot" value="<?= $code ?>">
-                            <select name="product_id" class="select" data-autosubmit="nonempty" <?= $options[$code] ? '' : 'disabled' ?>>
-                                <option value=""><?= $options[$code] ? '+ Chọn ' . e(mb_strtolower($name)) : 'Chưa có sản phẩm còn hàng' ?></option>
-                                <?php foreach ($options[$code] as $o): ?>
-                                    <option value="<?= $o['id'] ?>"><?= e($o['name']) ?> — <?= money(sale_price($o)) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </form>
-                    <?php endif; ?>
-                </div>
-            <?php endforeach; ?>
+        <div class="card no-pad" id="build-rows">
+            <?php require '../layout/build_rows.php'; ?>
         </div>
 
         <aside class="stack">
             <section class="card summary">
                 <h2 class="card-title">Kiểm tra tương thích</h2>
-                <?php if (!$build): ?>
-                    <p class="text-muted">Chọn linh kiện để bắt đầu kiểm tra.</p>
-                <?php else: ?>
-                    <?php if ($compat['ok']): ?>
-                        <div class="notice notice-success"><i class="bi bi-check-circle"></i> Các linh kiện đã chọn tương thích với nhau.</div>
-                    <?php endif; ?>
-                    <?php foreach ($compat['errors'] as $msg): ?>
-                        <div class="notice notice-danger"><i class="bi bi-x-circle"></i> <?= e($msg) ?></div>
-                    <?php endforeach; ?>
-                    <?php foreach ($compat['warnings'] as $msg): ?>
-                        <div class="notice notice-warning"><i class="bi bi-exclamation-triangle"></i> <?= e($msg) ?></div>
-                    <?php endforeach; ?>
-                    <div class="summary-row"><span>Công suất ước tính</span><b><?= $compat['total_power'] ?>W</b></div>
-                    <?php if ($compat['psu_watt']): ?>
-                        <div class="power-bar"><span style="width: <?= min(100, round($compat['total_power'] / $compat['psu_watt'] * 100)) ?>%"></span></div>
-                        <div class="form-hint">Nguồn <?= $compat['psu_watt'] ?>W · dùng <?= round($compat['total_power'] / $compat['psu_watt'] * 100) ?>%</div>
-                    <?php endif; ?>
-                <?php endif; ?>
-                <div class="summary-row summary-total"><span>Tổng tiền (<?= count($selected) ?> linh kiện)</span><b><?= money($total) ?></b></div>
+                <div class="summary-rows" id="build-check">
+                    <?php require '../layout/build_check.php'; ?>
+                </div>
                 <form method="post">
                     <input type="hidden" name="action" value="add_all">
-                    <button class="btn btn-primary btn-block btn-lg" <?= $build ? '' : 'disabled' ?>><i class="bi bi-cart-plus"></i> Thêm cấu hình vào giỏ</button>
+                    <button class="btn btn-primary btn-block btn-lg" id="build-add-all" <?= $build ? '' : 'disabled' ?>><i class="bi bi-cart-plus"></i> Thêm cấu hình vào giỏ</button>
                 </form>
             </section>
 
@@ -177,13 +118,13 @@ require '../layout/header.php';
                     </div>
                     <button class="btn btn-soft btn-block" <?= ai_enabled() ? '' : 'disabled' ?>><i class="bi bi-magic"></i> Phân tích &amp; tối ưu</button>
                 </form>
-                <?php if ($aiResult): ?>
+                <?php if ($aiResult): ?><div id="build-ai-result">
                     <?php if (isset($aiResult['error'])): ?>
                         <div class="notice notice-danger mt-8"><?= e($aiResult['error']) ?></div>
                     <?php else: ?>
                         <div class="ai-answer mt-8"><?= ai_format($aiResult['text']) ?></div>
                     <?php endif; ?>
-                <?php endif; ?>
+                </div><?php endif; ?>
             </section>
         </aside>
     </div>

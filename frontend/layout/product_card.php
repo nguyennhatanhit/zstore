@@ -10,6 +10,9 @@ $salePrice = sale_price($p);
             <span class="discount-tag">-<?= round(($p['price'] - $salePrice) / $p['price'] * 100) ?>%</span>
         <?php endif; ?>
     </a>
+    <button type="button" class="quick-view-btn" data-quick-view="<?= $p['id'] ?>" title="Xem nhanh" aria-label="Xem nhanh <?= e($p['name']) ?>">
+        <i class="bi bi-eye"></i>
+    </button>
     <div class="product-body">
         <div class="product-meta"><?= $p['brand_name'] ? e($p['brand_name']) . ' · ' : '' ?><?= e($p['category_name']) ?></div>
         <h3 class="product-name"><a href="<?= url('product.php?id=' . $p['id']) ?>"><?= e($p['name']) ?></a></h3>
@@ -19,7 +22,7 @@ $salePrice = sale_price($p);
         </div>
         <div class="product-foot">
             <?= stock_badge($p['stock_quantity']) ?>
-            <form action="<?= url('cart.php') ?>" method="post">
+            <form action="<?= url('cart.php') ?>" method="post" class="add-to-cart">
                 <input type="hidden" name="action" value="add">
                 <input type="hidden" name="product_id" value="<?= $p['id'] ?>">
                 <?= back_field() ?>

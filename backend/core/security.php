@@ -27,6 +27,13 @@ function csrf_inject($html)
     );
 }
 
+/** Token gửi lên có đúng không (dùng cho trang trả JSON) */
+function csrf_valid()
+{
+    $sent = isset($_POST['_csrf']) && is_string($_POST['_csrf']) ? $_POST['_csrf'] : '';
+    return $sent !== '' && hash_equals(csrf_token(), $sent);
+}
+
 /** Kiểm tra mọi yêu cầu POST (gọi trong config.php). */
 function csrf_verify()
 {

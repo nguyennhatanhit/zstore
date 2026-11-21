@@ -85,3 +85,32 @@ function check_compatibility(array $build)
 
     return ['ok' => !$errors, 'errors' => $errors, 'warnings' => $warnings, 'total_power' => $power, 'psu_watt' => $watt];
 }
+
+/** Dữ liệu hiển thị Build PC: sản phẩm từng vị trí, linh kiện đã chọn, tổng tiền, kết quả kiểm tra */
+function build_view(array $build)
+{
+    $slots = build_slots();
+    // Danh sách sản phẩm cho từng vị trí (còn hàng)
+    $options = [];
+    foreach ($slots as $code => $name) {
+        $options[$code] = db_all(product_sql() . " WHERE c.code = ? AND p.status = 'active' AND p.stock_quantity > 0 ORDER BY p.price", [$code]);
+    }
+
+    // Sản phẩm đã chọn
+    $selected = [];
+    $total = 0;
+    foreach ($build as $code => $productId) {
+        $p = db_one(product_sql() . " WHERE p.id = ?", [$productId]);
+        if ($p) {
+            $p['sale_price'] = sale_price($p);
+            $p['specs'] = product_spec_map($p['id']);
+            $selected[$code] = $p;
+            $total += $p['sale_price'];
+        }
+    }
+    $compat = check_compatibility($build);
+    // Thông số chính hiển thị dưới tên linh kiện
+    $keySpecs = ['socket', 'ram_type', 'form_factor', 'capacity', 'tdp', 'wattage', 'vram', 'length', 'cores', 'speed'];
+
+    return ['options' => $options, 'selected' => $selected, 'total' => $total, 'compat' => $compat, 'keySpecs' => $keySpecs];
+}

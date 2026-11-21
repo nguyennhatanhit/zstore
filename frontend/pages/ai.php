@@ -23,9 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     // Khung chat nổi gửi bằng JavaScript: trả về tin nhắn mới thay vì tải lại trang
     if (post_str('ajax') === '1') {
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['html' => $added ? ai_msg_html($added) : '']);
-        exit;
+        json_response(['ok' => true, 'html' => $added ? ai_msg_html($added) : '']);
     }
     redirect('ai.php#chat-end');
 }

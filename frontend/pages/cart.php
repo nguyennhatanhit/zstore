@@ -71,7 +71,7 @@ require '../layout/header.php';
 <section class="container section">
     <div class="page-heading">
         <h1>Giỏ hàng</h1>
-        <p class="text-muted"><?= $cart['count'] ?> sản phẩm</p>
+        <p class="text-muted"><span data-cart-count-text><?= $cart['count'] ?></span> sản phẩm</p>
     </div>
 
     <?php if (!$cart['items']): ?>
@@ -94,7 +94,7 @@ require '../layout/header.php';
                             <thead><tr><th>Sản phẩm</th><th>Đơn giá</th><th>Số lượng</th><th>Thành tiền</th><th></th></tr></thead>
                             <tbody>
                             <?php foreach ($cart['items'] as $item): ?>
-                                <tr>
+                                <tr data-cart-row="<?= $item['id'] ?>">
                                     <td>
                                         <div class="cart-product">
                                             <img src="<?= img_url($item['image']) ?>" alt="" onerror="this.onerror=null;this.src='<?= img_url('') ?>'">
@@ -108,8 +108,8 @@ require '../layout/header.php';
                                         <?= money($item['sale_price']) ?>
                                         <?php if ($item['sale_price'] < $item['price']): ?><div class="price-old"><?= money($item['price']) ?></div><?php endif; ?>
                                     </td>
-                                    <td><input type="number" name="quantities[<?= $item['id'] ?>]" value="<?= $item['quantity'] ?>" min="0" max="<?= $item['stock_quantity'] ?>" class="input qty-input"></td>
-                                    <td><b><?= money($item['line_total']) ?></b></td>
+                                    <td><input type="number" name="quantities[<?= $item['id'] ?>]" value="<?= $item['quantity'] ?>" min="0" max="<?= $item['stock_quantity'] ?>" class="input qty-input" data-cart-qty="<?= $item['id'] ?>"></td>
+                                    <td><b data-line-total><?= money($item['line_total']) ?></b></td>
                                     <td><button form="remove-<?= $item['id'] ?>" class="icon-btn" title="Xóa"><i class="bi bi-trash"></i></button></td>
                                 </tr>
                             <?php endforeach; ?>
@@ -118,7 +118,7 @@ require '../layout/header.php';
                     </div>
                 </form>
                 <?php foreach ($cart['items'] as $item): ?>
-                    <form method="post" id="remove-<?= $item['id'] ?>" class="hidden">
+                    <form method="post" id="remove-<?= $item['id'] ?>" class="hidden cart-remove">
                         <input type="hidden" name="action" value="remove">
                         <input type="hidden" name="product_id" value="<?= $item['id'] ?>">
                     </form>
@@ -138,32 +138,13 @@ require '../layout/header.php';
             <aside class="card summary">
                 <h2 class="card-title">Tóm tắt đơn hàng</h2>
 
-                <?php if ($cart['coupon']): ?>
-                    <form method="post" class="coupon-applied">
-                        <input type="hidden" name="action" value="remove_coupon">
-                        <span><i class="bi bi-ticket-perforated"></i> <b><?= e($cart['coupon']['code']) ?></b> · <?= e($cart['coupon']['name']) ?></span>
-                        <button class="icon-btn" title="Bỏ mã"><i class="bi bi-x-lg"></i></button>
-                    </form>
-                <?php else: ?>
-                    <form method="post" class="coupon-form">
-                        <input type="hidden" name="action" value="apply_coupon">
-                        <input name="coupon" class="input" placeholder="Mã giảm giá" required>
-                        <button class="btn btn-soft">Áp dụng</button>
-                    </form>
-                <?php endif; ?>
+                <div class="summary-rows" id="cart-coupon">
+                    <?php require '../layout/cart_coupon.php'; ?>
+                </div>
 
-                <div class="summary-row"><span>Tạm tính</span><b><?= money($cart['subtotal']) ?></b></div>
-                <?php if ($cart['saved'] > 0): ?>
-                    <div class="summary-row text-success"><span>Đã tiết kiệm (khuyến mãi)</span><span><?= money($cart['saved']) ?></span></div>
-                <?php endif; ?>
-                <?php if ($cart['discount'] > 0): ?>
-                    <div class="summary-row text-success"><span>Mã giảm giá</span><span>-<?= money($cart['discount']) ?></span></div>
-                <?php endif; ?>
-                <div class="summary-row"><span>Phí giao hàng</span><span><?= $cart['shipping'] ? money($cart['shipping']) : 'Miễn phí' ?></span></div>
-                <?php if ($cart['shipping']): ?>
-                    <p class="form-hint">Mua thêm <?= money(FREE_SHIPPING_FROM - $cart['subtotal']) ?> để được miễn phí giao hàng.</p>
-                <?php endif; ?>
-                <div class="summary-row summary-total"><span>Tổng cộng</span><b><?= money($cart['total']) ?></b></div>
+                <div class="summary-rows" id="cart-summary">
+                    <?php require '../layout/cart_summary.php'; ?>
+                </div>
 
                 <a href="<?= url('checkout.php') ?>" class="btn btn-primary btn-block btn-lg">Tiến hành đặt hàng</a>
                 <?php if (!current_user()): ?><p class="form-hint center">Bạn cần đăng nhập để đặt hàng.</p><?php endif; ?>

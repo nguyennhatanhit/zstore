@@ -80,7 +80,7 @@ require '../layout/header.php';
             </ul>
 
             <?php if ($product['stock_quantity'] > 0): ?>
-                <form action="<?= url('cart.php') ?>" method="post" class="pd-buy">
+                <form action="<?= url('cart.php') ?>" method="post" class="pd-buy add-to-cart">
                     <input type="hidden" name="action" value="add">
                     <input type="hidden" name="product_id" value="<?= $id ?>">
                     <?= back_field() ?>
@@ -92,11 +92,11 @@ require '../layout/header.php';
                 <div class="notice notice-warning"><i class="bi bi-exclamation-circle"></i> Sản phẩm tạm hết hàng.</div>
             <?php endif; ?>
 
-            <form action="<?= url('compare.php') ?>" method="post" class="mt-8">
+            <form action="<?= url('compare.php') ?>" method="post" class="mt-8 compare-toggle">
                 <input type="hidden" name="action" value="<?= $inCompare ? 'remove' : 'add' ?>">
                 <input type="hidden" name="product_id" value="<?= $id ?>">
                 <?= back_field() ?>
-                <button class="btn btn-outline"><i class="bi bi-arrow-left-right"></i> <?= $inCompare ? 'Bỏ khỏi so sánh' : 'Thêm vào so sánh' ?></button>
+                <button class="btn btn-outline"><i class="bi bi-arrow-left-right"></i> <span><?= $inCompare ? 'Bỏ khỏi so sánh' : 'Thêm vào so sánh' ?></span></button>
             </form>
         </div>
     </div>
